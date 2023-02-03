@@ -1,0 +1,20 @@
+services:
+  node:
+    image: concordium/testnet-node:5.0.6-0
+    ports:
+      - ${CONCORDIUM_NODE_PORT}:${CONCORDIUM_NODE_PORT}
+    working_dir: /
+    environment:
+      ## Refer https://github.com/Concordium/concordium-node/blob/main/VARIABLES.md#grpc
+      CONCORDIUM_NODE_RPC_SERVER_ADDR: 0.0.0.0
+      CONCORDIUM_NODE_RPC_SERVER_PORT: ${CONCORDIUM_NODE_PORT}
+      CONCORDIUM_NODE_LISTEN_ADDRESS: 0.0.0.0
+      CONCORDIUM_NODE_CONSENSUS_GENESIS_DATA_FILE: /testnet-genesis.dat
+      CONCORDIUM_NODE_CONFIG_DIR: "/node/concordium-node-data"
+      CONCORDIUM_NODE_DATA_DIR: "/node/concordium-node-config"
+      CONCORDIUM_NODE_CONNECTION_BOOTSTRAP_NODES: bootstrap.testnet.concordium.com:8888
+    volumes:
+      - ./dist/node/data:/node/concordium-node-data
+      - ./dist/node/config:/node/concordium-node-config
+    entrypoint:
+      - ./concordium-node
