@@ -56,6 +56,7 @@
     ]
   },
   "devDependencies": {
+    "@expo/webpack-config": "^18.0.1",
     "dotenv": "^16.0.3",
     "gh-pages": "^5.0.0"
   }
