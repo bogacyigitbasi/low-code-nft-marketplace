@@ -12,7 +12,7 @@ export const CIS2_MULTI_CONTRACT_INFO: Cis2ContractInfo = {
 	schemaBuffer: Buffer.from(MULTI_CONTRACT_SCHEMA, "hex"),
 	tokenIdByteSize: 1,
 };
-export const IPFS_GATEWAY_URL = "https://ipfs.io/ipfs";
+export const IPFS_GATEWAY_URL = "https://gateway.pinata.cloud/ipfs/";
 
 export const CREATE_NEW_MARKETPLACE = true;
 

@@ -209,7 +209,7 @@ function UploadMetadataIpfsCardStep(props: {
 										id="include-hash"
 									/>
 								}
-								label="Include Hash?"
+								label="Include Hash"
 							/>
 							<FormControlLabel
 								control={
