@@ -11,7 +11,11 @@ import { ContractAddress } from "@concordium/web-sdk";
 
 import { TokenListItem } from "../models/MarketplaceTypes";
 import { transfer } from "../models/MarketplaceClient";
-import { Typography } from "@mui/material";
+import {AlertColor, Paper, Typography } from "@mui/material";
+
+import Alert from "../components/ui/Alert";
+import { Container } from "@mui/system";
+
 
 export default function MarketplaceTransferDialog(props: {
 	isOpen: boolean;
@@ -37,6 +41,15 @@ export default function MarketplaceTransferDialog(props: {
 	};
 
 	const { token: item, provider, account, marketContractAddress } = props;
+
+	const [alertState, setAlertState] = useState<{
+		open: boolean;
+		message: string;
+		severity?: AlertColor;
+	}>({
+		open: false,
+		message: "",
+	});
 
 	function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -73,8 +86,14 @@ export default function MarketplaceTransferDialog(props: {
 					isBeingBought: false,
 					error: "",
 				});
-				alert("Bought");
-				handleClose();
+				// alert("Bought");
+				setAlertState({
+					open: true,
+					message: "Purchase succesful",
+					severity: "success"
+				});
+				// handleClose();
+			
 			})
 			.catch((err) => {
 				setState({
@@ -82,6 +101,11 @@ export default function MarketplaceTransferDialog(props: {
 					isBought: false,
 					isBeingBought: false,
 					error: err.message,
+				});
+				setAlertState({
+					open: true,
+					message: "Purchasing failed",
+					severity: "error"
 				});
 			});
 	}
@@ -95,9 +119,19 @@ export default function MarketplaceTransferDialog(props: {
 	};
 
 	return (
+		<Container>
+		<Paper>
+			<Alert
+			open={alertState.open}
+			message={alertState.message}
+			onClose={() => handleClose}
+			severity={alertState.severity}
+			// anchorOrigin={{ vertical: "top", horizontal: "center" }}
+		/> 
+		</Paper>
 		<Dialog open={open} onClose={handleClose}>
 			<DialogTitle>Buy Token: {props.token.tokenId}</DialogTitle>
-			<form onSubmit={(e) => submit(e)}>
+			<form onSubmit={(e) => submit(e)}>				
 				<DialogContent>
 					<TextField
 						autoFocus
@@ -131,5 +165,6 @@ export default function MarketplaceTransferDialog(props: {
 				</DialogActions>
 			</form>
 		</Dialog>
+		</Container>
 	);
 }

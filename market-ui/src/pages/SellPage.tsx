@@ -5,7 +5,7 @@ import {
 	StepLabel,
 	Typography,
 	Paper,
-	Container,
+	Container
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
@@ -17,7 +17,6 @@ import Cis2UpdateOperator from "../components/Cis2UpdateOperator";
 import Cis2FindInstance from "../components/Cis2FindInstance";
 import MarketplaceAdd from "../components/MarketplaceAdd";
 import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
-
 enum Steps {
 	FindCollection,
 	CheckOperator,
@@ -35,7 +34,7 @@ function SellPage(props: {
 }) {
 	const steps = [
 		{
-			title: "Nft Collection Contract Address",
+			title: "NFT Collection Contract Index",
 			step: Steps.FindCollection,
 		},
 		{ title: "Check Ownership", step: Steps.CheckOperator },
@@ -62,6 +61,7 @@ function SellPage(props: {
 			activeStep: steps[1],
 			nftContract: address,
 		});
+
 	}
 
 	function onCheckOperator(hasOwnership: boolean) {
