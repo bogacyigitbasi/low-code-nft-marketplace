@@ -76,7 +76,7 @@ function Cis2BatchMetadataAdd(props: {
 			)}
 			<ButtonGroup fullWidth>
 				<Button onClick={() => onAdd()} variant="contained" size="large">
-					Add Using Metadata Url
+					Add New Metadata Url
 				</Button>
 			</ButtonGroup>
 			<Grid container spacing={2} padding="10px">

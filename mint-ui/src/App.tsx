@@ -107,12 +107,19 @@ function App() {
 			</Box>
 			<footer className="footer">
 				<Typography textAlign={"center"} sx={{ color: "white" }}>
-					<Link
+					{/* <Link
 						sx={{ color: "white" }}
 						href="https://developer.concordium.software/en/mainnet/index.html"
 						target={"_blank"}
 					>
 						Concordium Developer Documentation
+					</Link> */}
+					<Link
+						sx={{ color: "white" }}
+						href="https://by0.gitbook.io/low-code-nft-framework/overview/concordium-low-code-nft-framework"
+						target={"_blank"}
+					>
+						Low-Code NFT Tools Documentation
 					</Link>
 				</Typography>
 			</footer>
