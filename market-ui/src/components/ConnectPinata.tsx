@@ -10,13 +10,14 @@ import { useState } from "react";
 import { PinataClient } from "../models/PinataClient";
 
 function ConnectPinata(props: {
+	jwt: string;
 	onDone: (jwt: string) => void;
 	onSkip: () => void;
 }) {
 	const [state, setState] = useState({
 		error: "",
 		processing: false,
-		pinataJwt: "",
+		pinataJwt: props.jwt,
 	});
 
 	function onOkClicked() {
@@ -46,6 +47,7 @@ function ConnectPinata(props: {
 				required={true}
 				error={!!state.error}
 				onChange={(e) => setState({ ...state, pinataJwt: e.target.value })}
+				value={state.pinataJwt}
 			/>
 			{state.error && <Typography component="div">{state.error}</Typography>}
 			{state.processing && (

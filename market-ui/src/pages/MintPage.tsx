@@ -1,7 +1,16 @@
 import { useState } from "react";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
-import {AlertColor, Stepper, Step, StepLabel, Typography, Paper } from "@mui/material";
+import {
+	Stepper,
+	Step,
+	StepLabel,
+	Typography,
+	Paper,
+	Grid,
+	IconButton,
+	Button,
+} from "@mui/material";
 import { Container } from "@mui/system";
 import { TokenInfo } from "../models/Cis2Types";
 import Cis2FindInstanceOrInit from "../components/Cis2FindInstanceOrInit";
@@ -10,7 +19,10 @@ import UploadFiles from "../components/ui/UploadFiles";
 import Cis2BatchMint from "../components/Cis2BatchMint";
 import Cis2BatchMetadataPrepareOrAdd from "../components/Cis2BatchMetadataPrepareOrAdd";
 import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
+
 import Alert from "../components/ui/Alert";
+import { ArrowBackRounded } from "@mui/icons-material";
+
 enum Steps {
 	GetOrInitCis2,
 	ConnectPinata,
@@ -142,6 +154,7 @@ function MintPage(props: {
 						provider={props.provider}
 						account={props.account}
 						contractInfo={props.contractInfo}
+						address={state.nftContract}
 						onDone={(address, contractInfo) =>
 							onGetCollectionAddress(address, contractInfo)
 						}
@@ -149,10 +162,10 @@ function MintPage(props: {
 				);
 			case Steps.ConnectPinata:
 				return (
-					<ConnectPinata onDone={onPinataConnected} onSkip={onPinataSkipped} />
+					<ConnectPinata onDone={onPinataConnected} onSkip={onPinataSkipped} jwt={state.pinataJwt} />
 				);
 			case Steps.UploadFiles:
-				return <UploadFiles onDone={onFilesUploaded} />;
+				return <UploadFiles onDone={onFilesUploaded} files={state.files} />;
 			case Steps.PrepareMetadata:
 				return (
 					<Cis2BatchMetadataPrepareOrAdd
@@ -178,6 +191,13 @@ function MintPage(props: {
 		}
 	}
 
+	function goBack(): void {
+		var activeStepIndex = steps.findIndex(s=>s.step === state.activeStep.step);
+		var previousStepIndex = Math.max(activeStepIndex - 1, 0);
+
+		setState({...state, activeStep: steps[previousStepIndex]});
+	}
+
 	return (
 		<Container sx={{ maxWidth: "xl", pt: "10px" }}>
 			<Stepper
@@ -192,6 +212,7 @@ function MintPage(props: {
 				))}
 			</Stepper>
 			<Paper sx={{ padding: "20px" }} variant="outlined">
+
 				<Typography
 					variant="h4"
 					gutterBottom
@@ -208,6 +229,24 @@ function MintPage(props: {
 				// anchorOrigin={{ vertical: "top", horizontal: "center" }}
 			/>
 		
+
+				<Grid container>
+					<Grid item xs={1}>
+						<IconButton sx={{border: "1px solid black", borderRadius: "100px"}} onClick={()=>goBack()}>
+							<ArrowBackRounded></ArrowBackRounded>
+						</IconButton>
+					</Grid>
+					<Grid item xs={11}>
+						<Typography
+							variant="h4"
+							gutterBottom
+							sx={{ pt: "20px", width: "100%" }}
+							textAlign="center"
+						>
+							{state.activeStep.title}
+						</Typography>
+					</Grid>
+				</Grid>
 				<StepContent />
 			</Paper>
 		</Container>
