@@ -12,7 +12,6 @@ import {
 	Button,
 } from "@mui/material";
 import { Container } from "@mui/system";
-
 import { TokenInfo } from "../models/Cis2Types";
 import Cis2FindInstanceOrInit from "../components/Cis2FindInstanceOrInit";
 import ConnectPinata from "../components/ConnectPinata";
@@ -20,6 +19,8 @@ import UploadFiles from "../components/ui/UploadFiles";
 import Cis2BatchMint from "../components/Cis2BatchMint";
 import Cis2BatchMetadataPrepareOrAdd from "../components/Cis2BatchMetadataPrepareOrAdd";
 import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
+
+import Alert from "../components/ui/Alert";
 import { ArrowBackRounded } from "@mui/icons-material";
 
 enum Steps {
@@ -40,7 +41,7 @@ function MintPage(props: {
 	const steps: StepType[] = [
 		{
 			step: Steps.GetOrInitCis2,
-			title: "Deploy Or Find NFT Collection",
+			title: "Create New or Find Existing NFT Collection",
 		},
 		{
 			step: Steps.ConnectPinata,
@@ -71,6 +72,7 @@ function MintPage(props: {
 		files: [],
 	});
 
+
 	function onGetCollectionAddress(
 		address: ContractAddress,
 		contractInfo: Cis2ContractInfo
@@ -88,6 +90,11 @@ function MintPage(props: {
 			pinataJwt,
 			activeStep: steps[2],
 		});
+		setAlertState({
+			open: true,
+			message: "Connected to Pinata",
+			severity: "success"
+		});
 	}
 
 	function onPinataSkipped() {
@@ -104,6 +111,11 @@ function MintPage(props: {
 			files,
 			activeStep: steps[3],
 		});
+		setAlertState({
+			open: true,
+			message: "Files loaded successfully and ready to upload to IPFS",
+			severity: "success"
+		});
 	}
 
 	function onMetadataPrepared(tokenMetadataMap: {
@@ -116,8 +128,22 @@ function MintPage(props: {
 		});
 	}
 
+	const [alertState, setAlertState] = useState<{
+		open: boolean;
+		message: string;
+		severity?: AlertColor;
+	}>({
+		open: false,
+		message: "",
+	});
+
 	function onNftsMinted() {
-		alert("All Minted");
+		setAlertState({
+			open: true,
+			message: "Minted",
+			severity: "success"
+		});
+		
 	}
 
 	function StepContent() {
@@ -186,6 +212,24 @@ function MintPage(props: {
 				))}
 			</Stepper>
 			<Paper sx={{ padding: "20px" }} variant="outlined">
+
+				<Typography
+					variant="h4"
+					gutterBottom
+					sx={{ pt: "20px" }}
+					textAlign="left"
+				>
+					{state.activeStep.title}
+				</Typography>
+				<Alert
+				open={alertState.open}
+				message={alertState.message}
+				onClose={() => setAlertState({ open: false, message: "" })}
+				severity={alertState.severity}
+				// anchorOrigin={{ vertical: "top", horizontal: "center" }}
+			/>
+		
+
 				<Grid container>
 					<Grid item xs={1}>
 						<IconButton sx={{border: "1px solid black", borderRadius: "100px"}} onClick={()=>goBack()}>

@@ -209,7 +209,7 @@ function UploadMetadataIpfsCardStep(props: {
 										id="include-hash"
 									/>
 								}
-								label="Include Hash?"
+								label="Include Hash"
 							/>
 							<FormControlLabel
 								control={
@@ -219,7 +219,7 @@ function UploadMetadataIpfsCardStep(props: {
 										id="unique"
 									/>
 								}
-								label="Unique?"
+								label="Unique"
 							/>
 						</Stack>
 						<DisplayError error={state.error} />

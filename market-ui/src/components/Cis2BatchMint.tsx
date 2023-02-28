@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button, Grid, Typography, Stack } from "@mui/material";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
-
+import { useNavigate } from "react-router-dom";
 import { mint } from "../models/Cis2Client";
 import { TokenInfo } from "../models/Cis2Types";
 import Cis2BatchItemMint from "./Cis2BatchItemMint";
@@ -40,6 +40,12 @@ function Cis2BatchMint(props: {
 		mintingCount: 0,
 		minted: false,
 	});
+
+
+	let navigate = useNavigate();
+	function onTokenListed() {
+		navigate("/");
+	}
 
 	function onMintClicked() {
 		var tokens = state.tokens;
@@ -129,6 +135,7 @@ function Cis2BatchMint(props: {
 				tokens[tokenId].minted = false;
 			} else {
 				tokens[tokenId].minted = isMinted;
+				// onTokenListed()
 			}
 		});
 	}

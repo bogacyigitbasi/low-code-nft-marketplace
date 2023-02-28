@@ -56,7 +56,7 @@ function Cis2BatchMetadataPrepareOrAdd(props: {
 				/>
 			) : (
 				<Typography variant="body1" component="div" gutterBottom>
-					No uploaded Files
+					{/* No uploaded Files */}
 				</Typography>
 			)}
 

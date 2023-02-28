@@ -142,7 +142,7 @@ function GetMetadataUrlCardStep(props: {
 						control={
 							<Checkbox defaultChecked name="includeHash" id="include-hash" />
 						}
-						label="Include Hash?"
+						label="Include Hash"
 					/>
 					<DisplayError error={state.error} />
 				</CardContent>

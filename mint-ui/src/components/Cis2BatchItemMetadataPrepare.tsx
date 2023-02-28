@@ -219,7 +219,7 @@ function UploadMetadataIpfsCardStep(props: {
 										id="unique"
 									/>
 								}
-								label="Unique?"
+								label="Unique"
 							/>
 						</Stack>
 						<DisplayError error={state.error} />

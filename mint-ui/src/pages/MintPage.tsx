@@ -30,7 +30,7 @@ function MintPage(props: {
 	const steps: StepType[] = [
 		{
 			step: Steps.GetOrInitCis2,
-			title: "Deploy or Find NFT Collection",
+			title: "Create New or Find Existing NFT Collection",
 		},
 		{
 			step: Steps.ConnectPinata,
