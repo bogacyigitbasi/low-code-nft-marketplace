@@ -38,7 +38,6 @@ function Cis2BatchMint(props: {
 	const [state, setState] = useState({
 		tokens,
 		mintingCount: 0,
-		minted: false,
 	});
 
 
@@ -70,7 +69,6 @@ function Cis2BatchMint(props: {
 					...state,
 					tokens,
 					mintingCount: state.mintingCount + mintingCount,
-					minted: true,
 				});
 				props.onDone(props.tokenMetadataMap);
 			})
@@ -81,7 +79,6 @@ function Cis2BatchMint(props: {
 					...state,
 					tokens,
 					mintingCount: state.mintingCount - mintingCount,
-					minted: false,
 				});
 			});
 	}
@@ -91,8 +88,7 @@ function Cis2BatchMint(props: {
 			<Typography variant="button" color={"InfoText"}>
 				<>
 					Contract : {props.nftContractAddress.index.toString()}/
-					{props.nftContractAddress.subindex.toString()} (
-					{props.contractInfo.contractName})
+					{props.nftContractAddress.subindex.toString()} ({props.contractInfo.contractName})
 				</>
 			</Typography>
 			<Grid container spacing={2}>
@@ -113,7 +109,7 @@ function Cis2BatchMint(props: {
 			<br />
 			<Button
 				variant="contained"
-				disabled={state.mintingCount > 0 || state.minted}
+				disabled={state.mintingCount > 0}
 				onClick={() => onMintClicked()}
 			>
 				Mint

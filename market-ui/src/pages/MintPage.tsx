@@ -2,6 +2,7 @@ import { useState } from "react";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
 import {
+	AlertColor,
 	Stepper,
 	Step,
 	StepLabel,
@@ -111,11 +112,7 @@ function MintPage(props: {
 			files,
 			activeStep: steps[3],
 		});
-		setAlertState({
-			open: true,
-			message: "Files loaded successfully and ready to upload to IPFS",
-			severity: "success"
-		});
+		
 	}
 
 	function onMetadataPrepared(tokenMetadataMap: {
@@ -194,62 +191,61 @@ function MintPage(props: {
 	function goBack(): void {
 		var activeStepIndex = steps.findIndex(s=>s.step === state.activeStep.step);
 		var previousStepIndex = Math.max(activeStepIndex - 1, 0);
-
-		setState({...state, activeStep: steps[previousStepIndex]});
+		if (state.activeStep.step == Steps.PrepareMetadata)
+			setState({...state, activeStep: steps[previousStepIndex-1]});	
+		
+		else
+			setState({...state, activeStep: steps[previousStepIndex]});
 	}
 
 	return (
+	
 		<Container sx={{ maxWidth: "xl", pt: "10px" }}>
-			<Stepper
-				activeStep={state.activeStep.step}
-				alternativeLabel
-				sx={{ padding: "20px" }}
-			>
-				{steps.map((step) => (
-					<Step key={step.step}>
-						<StepLabel>{step.title}</StepLabel>
-					</Step>
-				))}
-			</Stepper>
-			<Paper sx={{ padding: "20px" }} variant="outlined">
-
-				<Typography
-					variant="h4"
-					gutterBottom
-					sx={{ pt: "20px" }}
-					textAlign="left"
-				>
-					{state.activeStep.title}
-				</Typography>
+		<Stepper
+			activeStep={state.activeStep.step}
+			alternativeLabel
+			sx={{ padding: "20px" }}
+		>
+			{steps.map((step) => (
+				<Step key={step.step}>
+					<StepLabel>{step.title}</StepLabel>
+				</Step>
+			))}
+		</Stepper>
+		<Paper sx={{ padding: "20px" }} variant="outlined">
+			
+			<Grid container>
+			{/* <Grid>
 				<Alert
-				open={alertState.open}
-				message={alertState.message}
+			open={alertState.open}
+		 		message={alertState.message}
 				onClose={() => setAlertState({ open: false, message: "" })}
-				severity={alertState.severity}
-				// anchorOrigin={{ vertical: "top", horizontal: "center" }}
-			/>
-		
-
-				<Grid container>
-					<Grid item xs={1}>
-						<IconButton sx={{border: "1px solid black", borderRadius: "100px"}} onClick={()=>goBack()}>
-							<ArrowBackRounded></ArrowBackRounded>
-						</IconButton>
-					</Grid>
-					<Grid item xs={11}>
-						<Typography
-							variant="h4"
-							gutterBottom
-							sx={{ pt: "20px", width: "100%" }}
-							textAlign="center"
-						>
-							{state.activeStep.title}
-						</Typography>
-					</Grid>
+		 		severity={alertState.severity}
+		 		// anchorOrigin={{ vertical: "top", horizontal: "center" }}
+		 	/>
+				</Grid> */}
+				<Grid item xs={1}>
+					<IconButton sx={{border: "1px solid black", borderRadius: "100px"}} onClick={()=>goBack()}>
+						<ArrowBackRounded></ArrowBackRounded>
+					</IconButton>
 				</Grid>
-				<StepContent />
-			</Paper>
-		</Container>
+				<Grid item xs={11}>
+					<Typography
+						variant="h4"
+						gutterBottom
+						sx={{ pt: "20px", width: "100%" }}
+						textAlign="center"
+					>
+						{state.activeStep.title}
+					</Typography>
+				</Grid>
+		
+			</Grid>
+			<StepContent />
+		</Paper>
+
+	</Container>
+
 	);
 }
 

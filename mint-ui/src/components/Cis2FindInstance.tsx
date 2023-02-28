@@ -12,22 +12,28 @@ import {
 function Cis2FindInstance(props: {
 	provider: WalletApi;
 	contractInfo: Cis2ContractInfo;
+	address?: ContractAddress;
 	onDone: (address: ContractAddress, contractInfo: Cis2ContractInfo) => void;
 }) {
 	const [state, setState] = useState({
 		error: "",
 		checking: false,
 	});
+	const [form, setForm] = useState({
+		index: props.address?.index.toString() || "0",
+		subindex: props.address?.subindex.toString() || "0",
+	});
+
+	function setFormValue(key: string, value: string) {
+		setForm({ ...form, [key]: value });
+	}
 
 	function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		setState({ ...state, error: "", checking: true });
-		const formData = new FormData(event.currentTarget);
 
-		const index = BigInt(formData.get("contractIndex")?.toString() || "-1");
-		const subindex = BigInt(
-			formData.get("contractSubindex")?.toString() || "-1"
-		);
+		const index = BigInt(form.index);
+		const subindex = BigInt(form.subindex);
 
 		if (!(index >= 0)) {
 			setState({ ...state, error: "Invalid Contract Index" });
@@ -41,7 +47,9 @@ function Cis2FindInstance(props: {
 
 		const address = { index, subindex };
 		getInstanceInfo(props.provider, address)
-			.then((_) => ensureSupportsCis2(props.provider, props.contractInfo, address))
+			.then((_) =>
+				ensureSupportsCis2(props.provider, props.contractInfo, address)
+			)
 			.then(() => {
 				setState({ ...state, checking: false, error: "" });
 				props.onDone(address, props.contractInfo);
@@ -64,6 +72,8 @@ function Cis2FindInstance(props: {
 				label="Contract Index"
 				variant="standard"
 				type={"number"}
+				value={form.index.toString()}
+				onChange={(e) => setFormValue("index", e.target.value)}
 				disabled={state.checking}
 			/>
 			<TextField
@@ -73,7 +83,8 @@ function Cis2FindInstance(props: {
 				variant="standard"
 				type={"number"}
 				disabled={state.checking}
-				value={0}
+				value={form.subindex.toString()}
+				onChange={(e) => setFormValue("subindex", e.target.value)}
 			/>
 			{state.error && (
 				<Typography component="div" color="error">
