@@ -10,6 +10,7 @@ function Cis2FindInstanceOrInit(props: {
 	provider: WalletApi;
 	account: string;
 	contractInfo: Cis2ContractInfo;
+	address?: ContractAddress; 
 	onDone: (address: ContractAddress, contractInfo: Cis2ContractInfo) => void;
 }) {
 	return (
@@ -17,6 +18,7 @@ function Cis2FindInstanceOrInit(props: {
 			<Cis2FindInstance
 				provider={props.provider}
 				contractInfo={props.contractInfo}
+				address={props.address}
 				onDone={props.onDone}
 			/>
 			<Typography variant="overline">Or</Typography>
