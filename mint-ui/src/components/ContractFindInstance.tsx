@@ -24,9 +24,9 @@ function ContractFindInstance(props: {
 		setState({ ...state, error: "", checking: true });
 		const formData = new FormData(event.currentTarget);
 
-		const index = BigInt(formData.get("contractIndex")?.toString() || "-1");
+		const index = BigInt(formData.get("contractIndex")?.toString() || "0");
 		const subindex = BigInt(
-			formData.get("contractSubindex")?.toString() || "-1"
+			formData.get("contractSubindex")?.toString() || "0"
 		);
 
 		if (!(index >= 0)) {

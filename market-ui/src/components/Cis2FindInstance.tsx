@@ -20,7 +20,7 @@ function Cis2FindInstance(props: {
 		checking: false,
 	});
 	const [form, setForm] = useState({
-		index: props.address?.index.toString() || "-1",
+		index: props.address?.index.toString() || "0",
 		subindex: props.address?.subindex.toString() || "0",
 	});
 

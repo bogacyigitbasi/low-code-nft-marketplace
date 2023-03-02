@@ -19,8 +19,9 @@ import UploadFiles from "../components/ui/UploadFiles";
 import Cis2BatchMint from "../components/Cis2BatchMint";
 import Cis2BatchMetadataPrepareOrAdd from "../components/Cis2BatchMetadataPrepareOrAdd";
 import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
-import { ArrowBackRounded } from "@mui/icons-material";
 import Alert from "../components/ui/Alert";
+import { ArrowBackRounded } from "@mui/icons-material";
+
 enum Steps {
 	GetOrInitCis2,
 	ConnectPinata,
@@ -70,7 +71,6 @@ function MintPage(props: {
 		files: [],
 	});
 
-
 	function onGetCollectionAddress(
 		address: ContractAddress,
 		contractInfo: Cis2ContractInfo
@@ -91,7 +91,7 @@ function MintPage(props: {
 		setAlertState({
 			open: true,
 			message: "Connected to Pinata",
-			severity: "success"
+			severity: "success",
 		});
 	}
 
@@ -109,11 +109,6 @@ function MintPage(props: {
 			files,
 			activeStep: steps[3],
 		});
-		setAlertState({
-			open: true,
-			message: "Files loaded successfully and ready to upload to IPFS",
-			severity: "success"
-		});
 	}
 
 	function onMetadataPrepared(tokenMetadataMap: {
@@ -130,18 +125,10 @@ function MintPage(props: {
 		open: boolean;
 		message: string;
 		severity?: AlertColor;
-	}>({
-		open: false,
-		message: "",
-	});
+	}>({ open: false, message: "" });
 
 	function onNftsMinted() {
-		setAlertState({
-			open: true,
-			message: "Minted",
-			severity: "success"
-		});
-		
+		setAlertState({ open: true, message: "Minted", severity: "success" });
 	}
 
 	function StepContent() {
@@ -236,14 +223,14 @@ function MintPage(props: {
 						</Typography>
 					</Grid>
 				</Grid>
-				<Alert
-				open={alertState.open}
-				message={alertState.message}
-				onClose={() => setAlertState({ open: false, message: "" })}
-				severity={alertState.severity}
-				// anchorOrigin={{ vertical: "top", horizontal: "center" }}
-			/>
 				<StepContent />
+				<Alert
+					open={alertState.open}
+					message={alertState.message}
+					onClose={() => setAlertState({ open: false, message: "" })}
+					severity={alertState.severity}
+					// anchorOrigin={{ vertical: "top", horizontal: "center" }}
+				/>
 			</Paper>
 		</Container>
 	);
