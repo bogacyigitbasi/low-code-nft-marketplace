@@ -2,7 +2,6 @@ import { useState } from "react";
 import { WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { ContractAddress } from "@concordium/web-sdk";
 import {
-	AlertColor,
 	Stepper,
 	Step,
 	StepLabel,
@@ -10,7 +9,7 @@ import {
 	Paper,
 	Grid,
 	IconButton,
-	Button,
+	AlertColor,
 } from "@mui/material";
 import { Container } from "@mui/system";
 import { TokenInfo } from "../models/Cis2Types";
@@ -20,7 +19,6 @@ import UploadFiles from "../components/ui/UploadFiles";
 import Cis2BatchMint from "../components/Cis2BatchMint";
 import Cis2BatchMetadataPrepareOrAdd from "../components/Cis2BatchMetadataPrepareOrAdd";
 import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
-
 import Alert from "../components/ui/Alert";
 import { ArrowBackRounded } from "@mui/icons-material";
 
@@ -73,7 +71,6 @@ function MintPage(props: {
 		files: [],
 	});
 
-
 	function onGetCollectionAddress(
 		address: ContractAddress,
 		contractInfo: Cis2ContractInfo
@@ -94,7 +91,7 @@ function MintPage(props: {
 		setAlertState({
 			open: true,
 			message: "Connected to Pinata",
-			severity: "success"
+			severity: "success",
 		});
 	}
 
@@ -112,7 +109,6 @@ function MintPage(props: {
 			files,
 			activeStep: steps[3],
 		});
-		
 	}
 
 	function onMetadataPrepared(tokenMetadataMap: {
@@ -129,18 +125,10 @@ function MintPage(props: {
 		open: boolean;
 		message: string;
 		severity?: AlertColor;
-	}>({
-		open: false,
-		message: "",
-	});
+	}>({ open: false, message: "" });
 
 	function onNftsMinted() {
-		setAlertState({
-			open: true,
-			message: "Minted",
-			severity: "success"
-		});
-		
+		setAlertState({ open: true, message: "Minted", severity: "success" });
 	}
 
 	function StepContent() {
@@ -159,7 +147,11 @@ function MintPage(props: {
 				);
 			case Steps.ConnectPinata:
 				return (
-					<ConnectPinata onDone={onPinataConnected} onSkip={onPinataSkipped} jwt={state.pinataJwt} />
+					<ConnectPinata
+						onDone={onPinataConnected}
+						onSkip={onPinataSkipped}
+						jwt={state.pinataJwt}
+					/>
 				);
 			case Steps.UploadFiles:
 				return <UploadFiles onDone={onFilesUploaded} files={state.files} />;
@@ -189,63 +181,58 @@ function MintPage(props: {
 	}
 
 	function goBack(): void {
-		var activeStepIndex = steps.findIndex(s=>s.step === state.activeStep.step);
+		var activeStepIndex = steps.findIndex(
+			(s) => s.step === state.activeStep.step
+		);
 		var previousStepIndex = Math.max(activeStepIndex - 1, 0);
-		if (state.activeStep.step == Steps.PrepareMetadata)
-			setState({...state, activeStep: steps[previousStepIndex-1]});	
-		
-		else
-			setState({...state, activeStep: steps[previousStepIndex]});
+
+		setState({ ...state, activeStep: steps[previousStepIndex] });
 	}
 
 	return (
-	
 		<Container sx={{ maxWidth: "xl", pt: "10px" }}>
-		<Stepper
-			activeStep={state.activeStep.step}
-			alternativeLabel
-			sx={{ padding: "20px" }}
-		>
-			{steps.map((step) => (
-				<Step key={step.step}>
-					<StepLabel>{step.title}</StepLabel>
-				</Step>
-			))}
-		</Stepper>
-		<Paper sx={{ padding: "20px" }} variant="outlined">
-			
-			<Grid container>
-			{/* <Grid>
+			<Stepper
+				activeStep={state.activeStep.step}
+				alternativeLabel
+				sx={{ padding: "20px" }}
+			>
+				{steps.map((step) => (
+					<Step key={step.step}>
+						<StepLabel>{step.title}</StepLabel>
+					</Step>
+				))}
+			</Stepper>
+			<Paper sx={{ padding: "20px" }} variant="outlined">
+				<Grid container>
+					<Grid item xs={1}>
+						<IconButton
+							sx={{ border: "1px solid black", borderRadius: "100px" }}
+							onClick={() => goBack()}
+						>
+							<ArrowBackRounded></ArrowBackRounded>
+						</IconButton>
+					</Grid>
+					<Grid item xs={11}>
+						<Typography
+							variant="h4"
+							gutterBottom
+							sx={{ pt: "20px", width: "100%" }}
+							textAlign="center"
+						>
+							{state.activeStep.title}
+						</Typography>
+					</Grid>
+				</Grid>
+				<StepContent />
 				<Alert
-			open={alertState.open}
-		 		message={alertState.message}
-				onClose={() => setAlertState({ open: false, message: "" })}
-		 		severity={alertState.severity}
-		 		// anchorOrigin={{ vertical: "top", horizontal: "center" }}
-		 	/>
-				</Grid> */}
-				<Grid item xs={1}>
-					<IconButton sx={{border: "1px solid black", borderRadius: "100px"}} onClick={()=>goBack()}>
-						<ArrowBackRounded></ArrowBackRounded>
-					</IconButton>
-				</Grid>
-				<Grid item xs={11}>
-					<Typography
-						variant="h4"
-						gutterBottom
-						sx={{ pt: "20px", width: "100%" }}
-						textAlign="center"
-					>
-						{state.activeStep.title}
-					</Typography>
-				</Grid>
-		
-			</Grid>
-			<StepContent />
-		</Paper>
-
-	</Container>
-
+					open={alertState.open}
+					message={alertState.message}
+					onClose={() => setAlertState({ open: false, message: "" })}
+					severity={alertState.severity}
+					// anchorOrigin={{ vertical: "top", horizontal: "center" }}
+				/>
+			</Paper>
+		</Container>
 	);
 }
 

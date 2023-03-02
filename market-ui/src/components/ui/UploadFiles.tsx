@@ -1,4 +1,4 @@
-import { Grid,Button, ButtonGroup, AlertColor } from "@mui/material";
+import { Button, ButtonGroup, AlertColor } from "@mui/material";
 import { Stack } from "@mui/system";
 import FileUpload from "react-material-file-upload";
 import React from "react";
@@ -23,7 +23,7 @@ function UploadFiles(props: {
 		setAlertState({
 			open: true,
 			message: "Files are loaded to cache memory",
-			severity: "success"
+			severity: "success",
 		});
 	}
 	return (
@@ -35,15 +35,13 @@ function UploadFiles(props: {
 				title={""}
 				accept={[".jpg"]}
 			/>
-			<Grid>
-				<Alert
-			   open={alertState.open}
-		 		message={alertState.message}
+			<Alert
+				open={alertState.open}
+				message={alertState.message}
 				onClose={() => setAlertState({ open: false, message: "" })}
-		 		severity={alertState.severity}
-		 		// anchorOrigin={{ vertical: "top", horizontal: "center" }}
-		 	/>
-				</Grid>
+				severity={alertState.severity}
+				// anchorOrigin={{ vertical: "top", horizontal: "center" }}
+			/>
 			<ButtonGroup fullWidth>
 				<Button variant="contained" onClick={() => props.onDone(files)}>
 					Done
