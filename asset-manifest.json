@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/low-code-nft-marketplace/static/css/main.75213381.css",
+    "main.js": "/low-code-nft-marketplace/static/js/main.c4feb5f4.js",
+    "static/js/787.1d3220f0.chunk.js": "/low-code-nft-marketplace/static/js/787.1d3220f0.chunk.js",
+    "index.html": "/low-code-nft-marketplace/index.html",
+    "main.75213381.css.map": "/low-code-nft-marketplace/static/css/main.75213381.css.map",
+    "main.c4feb5f4.js.map": "/low-code-nft-marketplace/static/js/main.c4feb5f4.js.map",
+    "787.1d3220f0.chunk.js.map": "/low-code-nft-marketplace/static/js/787.1d3220f0.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.75213381.css",
+    "static/js/main.c4feb5f4.js"
+  ]
+}
