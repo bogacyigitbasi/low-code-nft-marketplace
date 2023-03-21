@@ -178,7 +178,8 @@ function App() {
 	function DefaultRouteElement() {
 		if (MINTING_UI_ONLY) {
 			return <Navigate replace to={"/mint-multi-batch"} />;
-		} else if (state.marketplaceContractAddress) {
+		} else 
+		if (state.marketplaceContractAddress) {
 			return (
 				<Navigate
 					replace
@@ -212,8 +213,8 @@ function App() {
 					{/* <Link sx={{color: "white"}} href="https://developer.concordium.software/en/mainnet/index.html" target={"_blank"}>Concordium Developer Documentation</Link> */}
 					<Link
 						sx={{ color: "white" }}
-						href="https://by0.gitbook.io/low-code-nft-framework/overview/concordium-low-code-nft-framework"
-						target={"_blank"}> Low-Code NFT Marketplace Documentation
+						href="https://developer.concordium.software/en/mainnet/net/guides/low-code-nft-marketplace/introduction.html"
+						target={"_blank"}>Visit the Concordium documentation portal to create your own marketplace in a few minutes!
 					</Link>
 				</Typography>
 			</footer>

@@ -10,6 +10,7 @@ import { useState } from "react";
 import { PinataClient } from "../models/PinataClient";
 
 function ConnectPinata(props: {
+	jwt: string;
 	onDone: (jwt: string) => void;
 	onSkip: () => void;
 }) {
