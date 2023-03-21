@@ -6,7 +6,7 @@ import {
 } from "./models/ConcordiumContractClient";
 
 /**
- * Contract Address for Marketplace.
+ * Contract Address for Marketplace. You should specify your contract's index when you initialized it.
  */
 export const MARKET_CONTRACT_ADDRESS = {
 	index: BigInt(1871),
@@ -17,6 +17,8 @@ export const MARKET_CONTRACT_ADDRESS = {
  * Marketplace Contract Schema.
  * Serialization code depends on this Schema. Any changes to the schema should have a corresponding change in MarketplaceDeserialzer.ts code.
  */
+// Module Reference and Contract Schema for the Marketplace Contract
+// Both module ref and the contract schema should be changed after a new contract deployed (if there are changes)
 const MARKET_CONTRACT_SCHEMA =
 	"FFFF02010000000A0000004D61726B65742D4E465401001400010000000A000000636F6D6D697373696F6E03030000000300000061646400140005000000140000006E66745F636F6E74726163745F616464726573730C08000000746F6B656E5F69641D000500000070726963650A07000000726F79616C747903080000007175616E746974791B25000000040000006C69737401140101000000100114000700000008000000746F6B656E5F69641D0008000000636F6E74726163740C0500000070726963650A050000006F776E65720B07000000726F79616C7479030D0000007072696D6172795F6F776E65720B080000007175616E746974791B25000000080000007472616E7366657200140005000000140000006E66745F636F6E74726163745F616464726573730C08000000746F6B656E5F69641D0002000000746F0B050000006F776E65720B080000007175616E746974791B25000000";
 
@@ -27,6 +29,8 @@ export const MARKETPLACE_CONTRACT_INFO: ContractInfo = {
 		"4f5e72a303d57d5502689f56bad19750b5bb11ede1cf662a082ef97e18651f69"
 	),
 };
+// Module Reference and Contract Schema for the CIS2-Multi
+// Both module ref and the contract schema should be changed after a new contract deployed (if there are changes)
 const MULTI_CONTRACT_MODULE_REF =
 	"312f99d6406868e647359ea816e450eac0ecc4281c2665a24936e6793535c9f6";
 const MULTI_CONTRACT_SCHEMA =
@@ -39,7 +43,11 @@ export const CIS2_MULTI_CONTRACT_INFO: Cis2ContractInfo = {
 };
 export const IPFS_GATEWAY_URL = "https://gateway.pinata.cloud/ipfs/";
 
+// Default value of the new marketplace contract init flag is false. 
+// It needs to be set as true in order to allow to create a new marketplace contract instance
 export const CREATE_NEW_MARKETPLACE = false;
+
+// Marketplace has the minting tool as a subtool, set true if the minting tool is required instead of the marketplace.
 export const MINTING_UI_ONLY = false;
 
 export const tokenIdToNftImageFileName = (
