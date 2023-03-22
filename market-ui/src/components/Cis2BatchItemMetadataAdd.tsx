@@ -37,7 +37,7 @@ enum Steps {
 
 function TokenImage(props: {
 	metadataUrl?: MetadataUrl;
-	onMetadataLoaded?: (metadata: Metadata) => void;
+	onMetadataLoaded?: (metadata: string) => void;
 }) {
 	const loadingTemplate = (
 		<Skeleton
@@ -106,16 +106,17 @@ function GetMetadataUrlCardStep(props: {
 		setState({ ...state, metadataUrl, error: "", includeHash: !!includeHash });
 	}
 
-	function onMetadataLoaded(metadata: Metadata) {
+	function onMetadataLoaded(metadata: string) {
 		const metadataUrl = {
 			url: state.metadataUrl?.url!,
 			hash: state.includeHash
-				? sha256([Buffer.from(JSON.stringify(metadata))]).toString("hex")
+				? sha256([Buffer.from(metadata)]).toString("hex")
 				: "",
 		};
-		setState({ ...state, metadata, metadataUrl });
 
-		props.onDone(metadataUrl, metadata);
+		let parsedMetadata = JSON.parse(metadata);
+		setState({ ...state, metadata: parsedMetadata, metadataUrl });
+		props.onDone(metadataUrl, parsedMetadata);
 	}
 
 	return (
