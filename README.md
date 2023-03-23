@@ -1,4 +1,6 @@
-# [CIS2 Token](https://proposals.concordium.software/CIS/cis-2.html) Low Code NFT Marketplace & Low Code Minting Tool
+# Low Code NFT Marketplace & Low Code Minting Tool for [CIS2 Token](https://proposals.concordium.software/CIS/cis-2.html)
+
+# Detailed Documentation about installation, running the dApp and other configurations can be found in the [Developer Portal](https://developer.concordium.software/en/mainnet/net/guides/low-code-nft-marketplace/introduction.html)
 
 Concordium is a science-based proof-of-stake blockchain created for all, with in particular business applications in mind. [Read more about concordium](https://www.concordium.com/about)
 
