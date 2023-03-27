@@ -1,8 +1,30 @@
 # Low Code NFT Marketplace & Low Code Minting Tool for [CIS2 Token](https://proposals.concordium.software/CIS/cis-2.html)
 
-# Detailed Documentation about installation, running the dApp and other configurations can be found in the [Developer Portal](https://developer.concordium.software/en/mainnet/net/guides/low-code-nft-marketplace/introduction.html)
+- Prerequisites for running the marketplace:
 
-Concordium is a science-based proof-of-stake blockchain created for business applications in mind. [Read more about concordium](https://www.concordium.com/about)
+  - Clone this Repository
+  - Install Concordium Browser Wallet
+  - **node.js** version 14.17.0 or above. If you already have node.js run `node -v` to check the version. You can use nvm to manage multiple Node versions installed on a single machine.
+  - **yarn** - a package manager for JavaScript; replaces the npm client.
+  - A code editor of your choice, such as Visual Studio Code.
+
+  Run `cd low-code-nft-marketplace/market-ui && yarn install` in the terminal.
+
+  Run `yarn start`
+
+- Prerequisites for running the marketplace:
+
+  - Clone this Repository
+  - Install Concordium Browser Wallet
+  - **node.js** version 14.17.0 or above. If you already have node.js run `node -v` to check the version. You can use nvm to manage multiple Node versions installed on a single machine.
+  - **yarn** - a package manager for JavaScript; replaces the npm client.
+  - A code editor of your choice, such as Visual Studio Code.
+
+  Run `cd low-code-nft-marketplace/mint-ui && yarn install` in the terminal.
+
+  Run `yarn start`
+
+Detailed Documentation about installation, running the dApp and other configurations can be found in the [Developer Portal](https://developer.concordium.software/en/mainnet/net/guides/low-code-nft-marketplace/introduction.html)
 
 This repository provides sample implementations of following ways in which a developer can interact with an on chain contract on Concordium.This repo includes both minting tool and the NFT Marketplace.
 
@@ -27,11 +49,6 @@ Please do note that this is **not** an exhaustive list of the languages supporte
 ## Get Started
 
 Throughout this repository [Concordium Testnet](https://testnet.ccdscan.io/) is being used to demo the functionality.
-
-- Prerequisites for running the framework:
-
-  - Clone this Repository
-  - Install Concordium Browser Wallet
 
 - Prerequisites for changing, deploying the smart contracts:
 
