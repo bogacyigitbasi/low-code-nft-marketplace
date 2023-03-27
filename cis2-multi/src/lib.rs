@@ -97,7 +97,7 @@ pub struct TokenMetadata {
 
 impl TokenMetadata {
     fn get_hash_bytes(&self) -> Option<[u8; 32]> {
-        match hex::decode(self.hash.to_owned()) {
+        match hex::decode(&self.hash) {
             Ok(v) => {
                 let slice = v.as_slice();
                 match slice.try_into() {
@@ -970,64 +970,62 @@ mod tests {
             .state()
             .balance(&TOKEN_1, &ADDRESS_0)
             .expect_report("Token is expected to exist");
-        unsafe {
-            claim_eq!(
-                balance1,
-                1.into(),
-                "Initial tokens are owned by the contract instantiater"
-            );
+        // unsafe {
+        claim_eq!(
+            balance1,
+            1.into(),
+            "Initial tokens are owned by the contract instantiater"
+        );
 
-            // Check the logs
-            claim_eq!(logger.logs.len(), 4, "Exactly four events should be logged");
-            claim!(
-                logger.logs.contains(&to_bytes(&Cis2Event::Mint(MintEvent {
-                    owner: ADDRESS_0,
+        // Check the logs
+        claim_eq!(logger.logs.len(), 4, "Exactly four events should be logged");
+        claim!(
+            logger.logs.contains(&to_bytes(&Cis2Event::Mint(MintEvent {
+                owner: ADDRESS_0,
+                token_id: TOKEN_0,
+                amount: ContractTokenAmount::from(400),
+            }))),
+            "Expected an event for minting TOKEN_0"
+        );
+        claim!(
+            logger.logs.contains(&to_bytes(&Cis2Event::Mint(MintEvent {
+                owner: ADDRESS_0,
+                token_id: TOKEN_1,
+                amount: ContractTokenAmount::from(1),
+            }))),
+            "Expected an event for minting TOKEN_1"
+        );
+
+        claim!(
+            logger.logs.contains(&to_bytes(
+                &Cis2Event::TokenMetadata::<_, ContractTokenAmount>(TokenMetadataEvent {
                     token_id: TOKEN_0,
-                    amount: ContractTokenAmount::from(400),
-                }))),
-                "Expected an event for minting TOKEN_0"
-            );
-            claim!(
-                logger.logs.contains(&to_bytes(&Cis2Event::Mint(MintEvent {
-                    owner: ADDRESS_0,
+                    metadata_url: (TokenMetadata {
+                        url: "url".to_string(),
+                        hash: "db2ca420a0090593ac6559ff2a98ce30abfe665d7a18ff3c63883e8b98622a73"
+                            .to_string()
+                    })
+                    .to_metadata_url(),
+                })
+            )),
+            "Expected an event for token metadata for TOKEN_0"
+        );
+
+        claim!(
+            logger.logs.contains(&to_bytes(
+                &Cis2Event::TokenMetadata::<_, ContractTokenAmount>(TokenMetadataEvent {
                     token_id: TOKEN_1,
-                    amount: ContractTokenAmount::from(1),
-                }))),
-                "Expected an event for minting TOKEN_1"
-            );
-
-            claim!(
-                logger.logs.contains(&to_bytes(
-                    &Cis2Event::TokenMetadata::<_, ContractTokenAmount>(TokenMetadataEvent {
-                        token_id: TOKEN_0,
-                        metadata_url: (TokenMetadata {
-                            url: "url".to_string(),
-                            hash:
-                                "db2ca420a0090593ac6559ff2a98ce30abfe665d7a18ff3c63883e8b98622a73"
-                                    .to_string()
-                        })
-                        .to_metadata_url(),
+                    metadata_url: (TokenMetadata {
+                        url: "url".to_string(),
+                        hash: "db2ca420a0090593ac6559ff2a98ce30abfe665d7a18ff3c63883e8b98622a73"
+                            .to_string()
                     })
-                )),
-                "Expected an event for token metadata for TOKEN_0"
-            );
-
-            claim!(
-                logger.logs.contains(&to_bytes(
-                    &Cis2Event::TokenMetadata::<_, ContractTokenAmount>(TokenMetadataEvent {
-                        token_id: TOKEN_1,
-                        metadata_url: (TokenMetadata {
-                            url: "url".to_string(),
-                            hash:
-                                "db2ca420a0090593ac6559ff2a98ce30abfe665d7a18ff3c63883e8b98622a73"
-                                    .to_string()
-                        })
-                        .to_metadata_url(),
-                    })
-                )),
-                "Expected an event for token metadata for TOKEN_1"
-            );
-        }
+                    .to_metadata_url(),
+                })
+            )),
+            "Expected an event for token metadata for TOKEN_1"
+        );
+        // }
     }
 
     /// Test transfer succeeds, when `from` is the sender.
