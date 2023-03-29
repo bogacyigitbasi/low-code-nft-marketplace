@@ -30,7 +30,7 @@ export default function MarketplaceTransferDialog(props: {
 		isBought?: boolean;
 		isBeingBought?: boolean;
 		error?: string;
-		totalAmount?: BigInt;
+		totalAmount: bigint;
 	}>({
 		totalAmount: props.token.quantity * props.token.price,
 	});
@@ -75,9 +75,9 @@ export default function MarketplaceTransferDialog(props: {
 			marketContractAddress,
 			item.contract,
 			item.tokenId,
-			item.price,
 			item.owner,
-			quantity
+			quantity,
+			state.totalAmount
 		)
 			.then((_) => {
 				setState({

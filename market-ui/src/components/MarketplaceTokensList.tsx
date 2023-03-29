@@ -9,6 +9,7 @@ import { TokenListItem } from "../models/MarketplaceTypes";
 import { list } from "../models/MarketplaceClient";
 import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
 import MarketplaceTransferDialog from "./MarketplaceTransferDialog";
+import MarketplaceWertTransferDialog from "./MarketplaceWertTransferDialog";
 
 /**
  * Gets the List of buyable tokens from Marketplace contract and displays them.
@@ -49,7 +50,7 @@ function MarketplaceTokensList(props: {
 				))}
 			</ImageList>
 			{state.selectedToken && (
-				<MarketplaceTransferDialog
+				<MarketplaceWertTransferDialog
 					provider={props.provider}
 					account={props.account}
 					marketContractAddress={props.marketContractAddress}

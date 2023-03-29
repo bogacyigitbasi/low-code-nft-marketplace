@@ -10,7 +10,7 @@ import {
 	updateContract,
 } from "./ConcordiumContractClient";
 
-const enum MethodNames {
+export const enum MethodNames {
 	add = "add",
 	transfer = "transfer",
 	list = "list",
@@ -80,9 +80,9 @@ export async function transfer(
 	marketContractAddress: ContractAddress,
 	nftContractAddress: ContractAddress,
 	tokenId: string,
-	priceCcd: bigint,
 	owner: string,
 	quantity: bigint,
+	totalPaymentCcd: bigint,
 	maxContractExecutionEnergy = BigInt(6000)
 ): Promise<Record<string, TransactionSummary>> {
 	const paramJson: TransferParams = {
@@ -101,6 +101,6 @@ export async function transfer(
 		marketContractAddress,
 		MethodNames.transfer,
 		maxContractExecutionEnergy,
-		priceCcd * quantity
+		totalPaymentCcd
 	);
 }
