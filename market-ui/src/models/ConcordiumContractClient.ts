@@ -236,7 +236,7 @@ function ensureValidOutcome(
  * @param params Contract Method params in JSON.
  * @returns Serialize buffer of the input params.
  */
-function serializeParams<T>(
+export function serializeParams<T>(
 	contractName: string,
 	schema: Buffer,
 	methodName: string,

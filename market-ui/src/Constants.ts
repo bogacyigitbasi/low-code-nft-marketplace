@@ -43,7 +43,7 @@ export const CIS2_MULTI_CONTRACT_INFO: Cis2ContractInfo = {
 };
 export const IPFS_GATEWAY_URL = "https://gateway.pinata.cloud/ipfs/";
 
-// Default value of the new marketplace contract init flag is false. 
+// Default value of the new marketplace contract init flag is false.
 // It needs to be set as true in order to allow to create a new marketplace contract instance
 export const CREATE_NEW_MARKETPLACE = false;
 
@@ -61,3 +61,7 @@ export const tokenIdToNftImageFileName = (
 export const tokenIdToNftMetadataFileName = (tokenId: string) => {
 	return `nft_${tokenId}_metadata.json`;
 };
+
+// Wert Config Options
+export const WERT_PRIVATE_KEY = "";
+export const WERT_PARTNER_ID = "";
