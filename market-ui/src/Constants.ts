@@ -63,5 +63,7 @@ export const tokenIdToNftMetadataFileName = (tokenId: string) => {
 };
 
 // Wert Config Options
-export const WERT_PRIVATE_KEY = "";
-export const WERT_PARTNER_ID = "";
+export const WERT_PRIVATE_KEY = "0x57466afb5491ee372b3b30d82ef7e7a0583c9e36aef0f02435bd164fe172b1d3";
+export const WERT_PARTNER_ID = "01GW6YMK3WN8QY8E8MTKP6MHXX";
+export const WERT_NETWORK = "testnet";
+export const WERT_ORIGIN = "https://sandbox.wert.io";
