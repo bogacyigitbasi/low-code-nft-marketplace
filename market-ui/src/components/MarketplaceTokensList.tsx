@@ -6,7 +6,7 @@ import { ContractAddress } from "@concordium/web-sdk";
 
 import MarketplaceTokensListItem from "./MarketplaceTokensListItem";
 import { TokenListItem } from "../models/MarketplaceTypes";
-import { list } from "../models/MarketplaceClient";
+import { list } from "../models/MarketplaceWebClient";
 import { Cis2ContractInfo } from "../models/ConcordiumContractClient";
 import MarketplaceTransferDialog from "./MarketplaceTransferDialog";
 
@@ -25,7 +25,7 @@ function MarketplaceTokensList(props: {
 	}>({ tokens: [] });
 
 	useEffect(() => {
-		list(props.provider, props.marketContractAddress).then((tokens) =>
+		list(props.marketContractAddress).then((tokens) =>
 			setState({ ...state, tokens })
 		);
 	}, [props.account, state.selectedToken]);
