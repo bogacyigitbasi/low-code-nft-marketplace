@@ -1,7 +1,7 @@
 use concordium_cis2::{OnReceivingCis2Params, Receiver};
 use concordium_std::*;
 
-use crate::{cis2_client::Cis2Client, error::*, state::*};
+use crate::{cis2_client::Cis2Client, error::*, events::AuctionEvent, state::*};
 
 pub type ContractOnReceivingCis2Params =
     OnReceivingCis2Params<ContractTokenId, ContractTokenAmount>;
@@ -20,7 +20,11 @@ pub struct InitParameter {
 }
 
 /// Init function that creates a new auction
-#[init(contract = "auction", parameter = "InitParameter")]
+#[init(
+    contract = "auction",
+    parameter = "InitParameter",
+    event = "AuctionEvent"
+)]
 pub fn auction_init<S: HasStateApi>(
     ctx: &impl HasInitContext,
     state_builder: &mut StateBuilder<S>,
@@ -33,11 +37,13 @@ pub fn auction_init<S: HasStateApi>(
     contract = "auction",
     name = "onReceivingCIS2",
     error = "ReceiveError",
-    mutable
+    mutable,
+    enable_logger
 )]
 fn auction_on_cis2_received<S: HasStateApi>(
     ctx: &impl HasReceiveContext,
     host: &mut impl HasHost<State<S>, StateApiType = S>,
+    logger: &mut impl HasLogger,
 ) -> Result<(), ReceiveError> {
     // Ensure the sender is a contract.
     let sender = if let Address::Contract(contract) = ctx.sender() {
@@ -65,6 +71,9 @@ fn auction_on_cis2_received<S: HasStateApi>(
     if let Some(pt) = state.participation_token.clone() {
         if pt.token_eq(&token_identifier) {
             state.participants.insert(from_account);
+            logger
+                .log(&AuctionEvent::ParticipantAdded(from_account))
+                .map_err(|_| ReceiveError::LogError)?;
             return Ok(());
         }
     }
@@ -78,6 +87,21 @@ fn auction_on_cis2_received<S: HasStateApi>(
         ReceiveError::AuctionAlreadyInitialized
     );
     state.auction_state = AuctionState::NotSoldYet(token_identifier);
+    logger
+        .log(&AuctionEvent::AuctionUpdated(
+            crate::events::AuctionUpdatedEvent {
+                auction_state: state.auction_state.clone(),
+                highest_bidder: state.highest_bidder,
+                minimum_raise: state.minimum_raise,
+                end: state.end,
+                start: state.start,
+                participation_token: state.participation_token.clone(),
+                highest_bid: host
+                    .exchange_rates()
+                    .convert_amount_to_euro_cent(host.self_balance()),
+            },
+        ))
+        .map_err(|_| ReceiveError::LogError)?;
 
     Ok(())
 }
@@ -88,12 +112,14 @@ fn auction_on_cis2_received<S: HasStateApi>(
     name = "bid",
     payable,
     mutable,
-    error = "BidError"
+    error = "BidError",
+    enable_logger
 )]
 pub fn auction_bid<S: HasStateApi>(
     ctx: &impl HasReceiveContext,
     host: &mut impl HasHost<State<S>, StateApiType = S>,
     amount: Amount,
+    logger: &mut impl HasLogger,
 ) -> Result<(), BidError> {
     let state = host.state();
     // Ensure that only accounts can place a bid
@@ -108,11 +134,12 @@ pub fn auction_bid<S: HasStateApi>(
     ensure!(slot_time > state.start, BidError::BidTooEarly);
     // If the state has a participation token
     // then check if the sender is in the list of participants
-    ensure!(
-        host.state().participation_token.is_some()
-            && host.state().participants.contains(&sender_address),
-        BidError::NotAParticipant
-    );
+    if host.state().participation_token.is_some() {
+        ensure!(
+            host.state().participants.contains(&sender_address),
+            BidError::NotAParticipant
+        );
+    }
 
     // Balance of the contract
     let balance = host.self_balance();
@@ -148,42 +175,24 @@ pub fn auction_bid<S: HasStateApi>(
         // well. https://consensys.github.io/smart-contract-best-practices/attacks/denial-of-service/
         host.invoke_transfer(&account_address, previous_balance)
             .unwrap_abort();
+        let state = host.state();
+        logger
+            .log(&AuctionEvent::AuctionUpdated(
+                crate::events::AuctionUpdatedEvent {
+                    auction_state: state.auction_state.clone(),
+                    highest_bidder: state.highest_bidder,
+                    minimum_raise: state.minimum_raise,
+                    end: state.end,
+                    start: state.start,
+                    participation_token: state.participation_token.clone(),
+                    highest_bid: host
+                        .exchange_rates()
+                        .convert_amount_to_euro_cent(host.self_balance()),
+                },
+            ))
+            .map_err(|_| BidError::LogError)?;
     }
     Ok(())
-}
-
-#[derive(Serial, SchemaType)]
-pub struct ViewState {
-    pub auction_state: AuctionState,
-    /// The highest bidder so far; The variant `None` represents
-    /// that no bidder has taken part in the auction yet.
-    pub highest_bidder: Option<AccountAddress>,
-    /// The minimum accepted raise to over bid the current bidder in Euro cent.
-    pub minimum_raise: u64,
-    /// Time when auction ends (to be displayed by the front-end)
-    pub end: Timestamp,
-    /// Token needed to participate in the Auction
-    pub participation_token: Option<ParticipationTokenIdentifier>,
-    pub participants: Vec<AccountAddress>,
-}
-
-/// View function that returns the content of the state
-#[receive(contract = "auction", name = "view", return_value = "ViewState")]
-pub fn view<S: HasStateApi>(
-    _ctx: &impl HasReceiveContext,
-    host: &impl HasHost<State<S>, StateApiType = S>,
-) -> ReceiveResult<ViewState> {
-    let state = host.state();
-    let participants = state.participants.iter().map(|a| *a).collect();
-
-    Ok(ViewState {
-        auction_state: state.auction_state.to_owned(),
-        highest_bidder: state.highest_bidder,
-        minimum_raise: state.minimum_raise,
-        end: state.end,
-        participation_token: state.participation_token.to_owned(),
-        participants,
-    })
 }
 
 /// ViewHighestBid function that returns the highest bid which is the balance of
@@ -326,6 +335,7 @@ mod tests {
     fn bid(
         host: &mut TestHost<State<TestStateApi>>,
         ctx: &TestContext<TestReceiveOnlyData>,
+        logger: &mut TestLogger,
         amount: Amount,
         current_smart_contract_balance: Amount,
     ) {
@@ -338,10 +348,10 @@ mod tests {
         host.set_self_balance(amount + current_smart_contract_balance);
 
         // Invoking the bid function.
-        auction_bid(ctx, host, amount).expect_report("Bidding should pass.");
+        auction_bid(ctx, host, amount, logger).expect_report("Bidding should pass.");
     }
 
-    fn initialize_auction(host: &mut TestHost<State<TestStateApi>>) {
+    fn initialize_auction(host: &mut TestHost<State<TestStateApi>>, logger: &mut TestLogger) {
         let sender = Address::Contract(PARTICIPATION_TOKEN.contract);
         let mut ctx = new_ctx(OWNER_ACCOUNT, sender, 0);
         let params = ContractOnReceivingCis2Params {
@@ -353,10 +363,14 @@ mod tests {
         let param_bytes = to_bytes(&params);
         ctx.set_parameter(&param_bytes);
 
-        auction_on_cis2_received(&ctx, host).expect("should add a token for Auction");
+        auction_on_cis2_received(&ctx, host, logger).expect("should add a token for Auction");
     }
 
-    fn add_auction_participant(host: &mut TestHost<State<TestStateApi>>, participant: Address) {
+    fn add_auction_participant(
+        host: &mut TestHost<State<TestStateApi>>,
+        participant: Address,
+        logger: &mut TestLogger,
+    ) {
         let sender = Address::Contract(PARTICIPATION_TOKEN.contract);
         let mut ctx = new_ctx(OWNER_ACCOUNT, sender, 0);
         let params = ContractOnReceivingCis2Params {
@@ -368,7 +382,7 @@ mod tests {
         let param_bytes = to_bytes(&params);
         ctx.set_parameter(&param_bytes);
 
-        auction_on_cis2_received(&ctx, host).expect("should add a participant");
+        auction_on_cis2_received(&ctx, host, logger).expect("should add a participant");
     }
 
     #[concordium_test]
@@ -412,30 +426,44 @@ mod tests {
             auction_init(&ctx0, &mut state_builder).expect("Initialization should pass");
 
         let mut host = TestHost::new(initial_state, state_builder);
+        let mut logger = TestLogger::init();
+
         host.set_exchange_rates(ExchangeRates {
             euro_per_energy: ExchangeRate::new_unchecked(1, 1),
             micro_ccd_per_euro: ExchangeRate::new_unchecked(1, 1),
         });
 
-        initialize_auction(&mut host);
+        initialize_auction(&mut host, &mut logger);
 
         // 1st bid: Alice bids `amount`.
         // The current_smart_contract_balance before the invoke is 0.
         let (alice, alice_ctx) = new_account_ctx();
-        add_auction_participant(&mut host, alice_ctx.sender());
-        bid(&mut host, &alice_ctx, amount, Amount::from_micro_ccd(0));
+        add_auction_participant(&mut host, alice_ctx.sender(), &mut logger);
+        bid(
+            &mut host,
+            &alice_ctx,
+            &mut logger,
+            amount,
+            Amount::from_micro_ccd(0),
+        );
 
         // 2nd bid: Alice bids `amount + amount`.
         // Alice gets her initial bid refunded.
         // The current_smart_contract_balance before the invoke is amount.
-        bid(&mut host, &alice_ctx, amount + amount, amount);
+        bid(&mut host, &alice_ctx, &mut logger, amount + amount, amount);
 
         // 3rd bid: Bob bids `winning_amount`.
         // Alice gets refunded.
         // The current_smart_contract_balance before the invoke is amount + amount.
         let (bob, bob_ctx) = new_account_ctx();
-        add_auction_participant(&mut host, bob_ctx.sender());
-        bid(&mut host, &bob_ctx, winning_amount, amount + amount);
+        add_auction_participant(&mut host, bob_ctx.sender(), &mut logger);
+        bid(
+            &mut host,
+            &bob_ctx,
+            &mut logger,
+            winning_amount,
+            amount + amount,
+        );
 
         // Trying to finalize auction that is still active
         // (specifically, the tx is submitted at the last moment,
@@ -505,7 +533,7 @@ mod tests {
         );
 
         // Attempting to bid again should fail.
-        let res4 = auction_bid(&bob_ctx, &mut host, big_amount);
+        let res4 = auction_bid(&bob_ctx, &mut host, big_amount, &mut logger);
         expect_error(
             res4,
             BidError::AuctionNotOpen,
@@ -531,18 +559,26 @@ mod tests {
             auction_init(&ctx0, &mut state_builder).expect("Initialization should succeed.");
 
         let mut host = TestHost::new(initial_state, state_builder);
+        let mut logger = TestLogger::init();
+
         host.set_exchange_rates(ExchangeRates {
             euro_per_energy: ExchangeRate::new_unchecked(1, 1),
             micro_ccd_per_euro: ExchangeRate::new_unchecked(1, 1),
         });
 
-        initialize_auction(&mut host);
-        add_auction_participant(&mut host, ctx1.sender());
-        add_auction_participant(&mut host, ctx2.sender());
+        initialize_auction(&mut host, &mut logger);
+        add_auction_participant(&mut host, ctx1.sender(), &mut logger);
+        add_auction_participant(&mut host, ctx2.sender(), &mut logger);
 
         // 1st bid: Account1 bids `amount`.
         // The current_smart_contract_balance before the invoke is 0.
-        bid(&mut host, &ctx1, amount, Amount::from_micro_ccd(0));
+        bid(
+            &mut host,
+            &ctx1,
+            &mut logger,
+            amount,
+            Amount::from_micro_ccd(0),
+        );
 
         // Setting the contract balance.
         // This should be the sum of the contract’s initial balance and
@@ -556,7 +592,7 @@ mod tests {
 
         // 2nd bid: Account2 bids `amount` (should fail
         // because amount is equal to highest bid).
-        let res2 = auction_bid(&ctx2, &mut host, amount);
+        let res2 = auction_bid(&ctx2, &mut host, amount, &mut logger);
         expect_error(
             res2,
             BidError::BidBelowCurrentBid,
@@ -576,12 +612,17 @@ mod tests {
             auction_init(&ctx, &mut state_builder).expect("Initialization should succeed.");
 
         let mut host = TestHost::new(initial_state, state_builder);
+        host.set_exchange_rates(ExchangeRates {
+            euro_per_energy: ExchangeRate::new_unchecked(1, 1),
+            micro_ccd_per_euro: ExchangeRate::new_unchecked(1, 1),
+        });
+        let mut logger = TestLogger::init();
 
-        initialize_auction(&mut host);
+        initialize_auction(&mut host, &mut logger);
         let ctx1 = new_account_ctx().1;
-        add_auction_participant(&mut host, ctx1.sender());
+        add_auction_participant(&mut host, ctx1.sender(), &mut logger);
 
-        let res = auction_bid(&ctx1, &mut host, Amount::zero());
+        let res = auction_bid(&ctx1, &mut host, Amount::zero(), &mut logger);
         expect_error(
             res,
             BidError::BidBelowCurrentBid,

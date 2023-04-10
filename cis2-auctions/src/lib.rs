@@ -31,3 +31,4 @@ mod cis2_client;
 pub mod contract;
 mod error;
 mod state;
+pub mod events;

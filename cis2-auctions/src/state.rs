@@ -15,7 +15,7 @@ pub struct AuctionTokenIdentifier {
     pub(crate) amount: ContractTokenAmount,
 }
 
-#[derive(Serial, Deserial, SchemaType, Clone)]
+#[derive(Debug, Serial, Deserial, SchemaType, Clone)]
 pub struct ParticipationTokenIdentifier {
     pub(crate) contract: ContractAddress,
     pub(crate) token_id: ContractTokenId,

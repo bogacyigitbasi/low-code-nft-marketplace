@@ -18,6 +18,7 @@ pub enum BidError {
     /// Raised when bid is placed after auction has been finalized.
     AuctionNotOpen,
     NotAParticipant,
+    LogError,
 }
 
 /// `finalize` function errors
@@ -37,4 +38,5 @@ pub enum ReceiveError {
     OnlyAccount,
     UnAuthorized,
     AuctionAlreadyInitialized,
+    LogError,
 }
