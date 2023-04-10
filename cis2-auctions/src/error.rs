@@ -11,11 +11,13 @@ pub enum BidError {
     /// Raised when a new bid amount is raising the current highest bid
     /// with less than the minimum raise.
     BidBelowMinimumRaise,
-    /// Raised when bid is placed after auction end time passed.
+    /// Raised when bid is placed after auction end time.
     BidTooLate,
+    /// Raised when bid is placed before auction start time.
+    BidTooEarly,
     /// Raised when bid is placed after auction has been finalized.
     AuctionNotOpen,
-    NotAParticipant
+    NotAParticipant,
 }
 
 /// `finalize` function errors
@@ -34,6 +36,5 @@ pub enum ReceiveError {
     ContractOnly,
     OnlyAccount,
     UnAuthorized,
-    AuctionAlreadyInitialized
-
+    AuctionAlreadyInitialized,
 }

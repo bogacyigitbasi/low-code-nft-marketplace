@@ -80,8 +80,10 @@ pub struct State<S: HasStateApi> {
     pub minimum_raise: u64,
     /// Time when auction ends (to be displayed by the front-end)
     pub end: Timestamp,
+    /// Time when auction starts (to be displayed by the front-end)
+    pub start: Timestamp,
     /// Token needed to participate in the Auction
-    pub participation_token: ParticipationTokenIdentifier,
+    pub participation_token: Option<ParticipationTokenIdentifier>,
     pub participants: StateSet<AccountAddress, S>,
 }
 
@@ -91,6 +93,7 @@ impl<S: HasStateApi> State<S> {
             auction_state: AuctionState::NotInitialized,
             highest_bidder: None,
             minimum_raise: parameter.minimum_raise,
+            start: parameter.start,
             end: parameter.end,
             participation_token: parameter.participation_token,
             participants: state_builder.new_set(),

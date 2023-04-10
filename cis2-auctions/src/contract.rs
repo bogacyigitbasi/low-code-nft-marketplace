@@ -11,10 +11,12 @@ pub type ContractOnReceivingCis2Params =
 pub struct InitParameter {
     /// Time when auction ends using the RFC 3339 format (https://tools.ietf.org/html/rfc3339)
     pub end: Timestamp,
+    /// Time when auction starts using the RFC 3339 format (https://tools.ietf.org/html/rfc3339)
+    pub start: Timestamp,
     /// The minimum accepted raise to over bid the current bidder in Euro cent.
     pub minimum_raise: u64,
     /// Token needed to participate in the Auction.
-    pub participation_token: ParticipationTokenIdentifier,
+    pub participation_token: Option<ParticipationTokenIdentifier>,
 }
 
 /// Init function that creates a new auction
@@ -58,17 +60,24 @@ fn auction_on_cis2_received<S: HasStateApi>(
     let token_identifier = AuctionTokenIdentifier::new(sender, params.token_id, params.amount);
     let state = host.state_mut();
 
-    if state.participation_token.token_eq(&token_identifier) {
-        state.participants.insert(from_account);
-    } else {
-        ensure!(from_account.eq(&ctx.owner()), ReceiveError::UnAuthorized);
-        ensure_eq!(
-            state.auction_state,
-            AuctionState::NotInitialized,
-            ReceiveError::AuctionAlreadyInitialized
-        );
-        state.auction_state = AuctionState::NotSoldYet(token_identifier)
+    // If the token sent is a participation token
+    // then add the sender as a participant
+    if let Some(pt) = state.participation_token.clone() {
+        if pt.token_eq(&token_identifier) {
+            state.participants.insert(from_account);
+            return Ok(());
+        }
     }
+
+    // If the token being sent is not the participation token
+    // Start an auction from the sent token
+    ensure!(from_account.eq(&ctx.owner()), ReceiveError::UnAuthorized);
+    ensure_eq!(
+        state.auction_state,
+        AuctionState::NotInitialized,
+        ReceiveError::AuctionAlreadyInitialized
+    );
+    state.auction_state = AuctionState::NotSoldYet(token_identifier);
 
     Ok(())
 }
@@ -87,21 +96,21 @@ pub fn auction_bid<S: HasStateApi>(
     amount: Amount,
 ) -> Result<(), BidError> {
     let state = host.state();
-    // Ensure the auction has not been finalized yet
-    ensure!(state.auction_state.is_open(), BidError::AuctionNotOpen);
-
-    let slot_time = ctx.metadata().slot_time();
-    // Ensure the auction has not ended yet
-    ensure!(slot_time <= state.end, BidError::BidTooLate);
-
     // Ensure that only accounts can place a bid
     let sender_address = match ctx.sender() {
         Address::Contract(_) => bail!(BidError::OnlyAccount),
         Address::Account(account_address) => account_address,
     };
-
+    let slot_time = ctx.metadata().slot_time();
+    // Ensure the auction has not been finalized yet
+    ensure!(state.auction_state.is_open(), BidError::AuctionNotOpen);
+    ensure!(slot_time <= state.end, BidError::BidTooLate);
+    ensure!(slot_time > state.start, BidError::BidTooEarly);
+    // If the state has a participation token
+    // then check if the sender is in the list of participants
     ensure!(
-        host.state().participants.contains(&sender_address),
+        host.state().participation_token.is_some()
+            && host.state().participants.contains(&sender_address),
         BidError::NotAParticipant
     );
 
@@ -120,6 +129,7 @@ pub fn auction_bid<S: HasStateApi>(
     let exchange_rates = host.exchange_rates();
     // Convert the CCD difference to EUR
     let euro_cent_difference = exchange_rates.convert_amount_to_euro_cent(amount_difference);
+
     // Ensure that the bid is at least the `minimum_raise` more than the previous
     // bid
     ensure!(
@@ -153,7 +163,7 @@ pub struct ViewState {
     /// Time when auction ends (to be displayed by the front-end)
     pub end: Timestamp,
     /// Token needed to participate in the Auction
-    pub participation_token: ParticipationTokenIdentifier,
+    pub participation_token: Option<ParticipationTokenIdentifier>,
     pub participants: Vec<AccountAddress>,
 }
 
@@ -245,7 +255,8 @@ mod tests {
 
     // A counter for generating new accounts
     static ADDRESS_COUNTER: AtomicU8 = AtomicU8::new(0);
-    const AUCTION_END: u64 = 1;
+    const AUCTION_START: u64 = 1;
+    const AUCTION_END: u64 = 10;
     const OWNER_ACCOUNT: AccountAddress = AccountAddress([
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 1,
@@ -271,9 +282,10 @@ mod tests {
 
     fn item_end_parameter() -> InitParameter {
         InitParameter {
+            start: Timestamp::from_timestamp_millis(AUCTION_START),
             end: Timestamp::from_timestamp_millis(AUCTION_END),
             minimum_raise: 100,
-            participation_token: PARTICIPATION_TOKEN,
+            participation_token: Some(PARTICIPATION_TOKEN),
         }
     }
 
