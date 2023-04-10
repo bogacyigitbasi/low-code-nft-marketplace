@@ -195,16 +195,6 @@ pub fn auction_bid<S: HasStateApi>(
     Ok(())
 }
 
-/// ViewHighestBid function that returns the highest bid which is the balance of
-/// the contract
-#[receive(contract = "auction", name = "viewHighestBid", return_value = "Amount")]
-pub fn view_highest_bid<S: HasStateApi>(
-    _ctx: &impl HasReceiveContext,
-    host: &impl HasHost<State<S>, StateApiType = S>,
-) -> ReceiveResult<Amount> {
-    Ok(host.self_balance())
-}
-
 /// Receive function used to finalize the auction. It sends the highest bid (the
 /// current balance of this smart contract) to the owner of the smart contract
 /// instance.
@@ -212,17 +202,19 @@ pub fn view_highest_bid<S: HasStateApi>(
     contract = "auction",
     name = "finalize",
     mutable,
-    error = "FinalizeError"
+    error = "FinalizeError",
+    enable_logger
 )]
 pub fn auction_finalize<S: HasStateApi>(
     ctx: &impl HasReceiveContext,
     host: &mut impl HasHost<State<S>, StateApiType = S>,
+    logger: &mut impl HasLogger,
 ) -> Result<(), FinalizeError> {
     let state = host.state();
+    let slot_time = ctx.metadata().slot_time();
+
     // Ensure the auction has not been finalized yet
     ensure!(state.auction_state.is_open(), FinalizeError::AuctionNotOpen);
-
-    let slot_time = ctx.metadata().slot_time();
     // Ensure the auction has ended already
     ensure!(slot_time > state.end, FinalizeError::AuctionStillActive);
 
@@ -250,6 +242,22 @@ pub fn auction_finalize<S: HasStateApi>(
         // If an account exists, and the contract has the funds then the
         // transfer will always succeed.
         host.invoke_transfer(&owner, balance).unwrap_abort();
+        let state = host.state();
+        logger
+            .log(&AuctionEvent::AuctionUpdated(
+                crate::events::AuctionUpdatedEvent {
+                    auction_state: state.auction_state.clone(),
+                    highest_bidder: state.highest_bidder,
+                    minimum_raise: state.minimum_raise,
+                    end: state.end,
+                    start: state.start,
+                    participation_token: state.participation_token.clone(),
+                    highest_bid: host
+                        .exchange_rates()
+                        .convert_amount_to_euro_cent(host.self_balance()),
+                },
+            ))
+            .map_err(|_| FinalizeError::LogError)?;
     }
     Ok(())
 }
@@ -474,7 +482,7 @@ mod tests {
             index: 1,
             subindex: 0,
         });
-        let fin_res = auction_finalize(&ctx4, &mut host);
+        let fin_res = auction_finalize(&ctx4, &mut host, &mut logger);
         expect_error(
             fin_res,
             FinalizeError::AuctionStillActive,
@@ -497,7 +505,7 @@ mod tests {
             OwnedEntrypointName::new_unchecked("transfer".into()),
             MockFn::returning_ok(()),
         );
-        let fin_res2 = auction_finalize(&ctx5, &mut host);
+        let fin_res2 = auction_finalize(&ctx5, &mut host, &mut logger);
         fin_res2.expect_report("Finalizing the auction should work");
         let transfers = host.get_transfers();
         // The input arguments of all executed `host.invoke_transfer`
@@ -525,7 +533,7 @@ mod tests {
         }
 
         // Attempting to finalize auction again should fail.
-        let fin_res3 = auction_finalize(&ctx5, &mut host);
+        let fin_res3 = auction_finalize(&ctx5, &mut host, &mut logger);
         expect_error(
             fin_res3,
             FinalizeError::AuctionNotOpen,

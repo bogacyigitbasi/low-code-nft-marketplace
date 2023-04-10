@@ -29,6 +29,7 @@ pub enum FinalizeError {
     /// Raised when finalizing an auction that is already finalized
     AuctionNotOpen,
     Cis2TransferError,
+    LogError,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Reject, Serial, SchemaType)]
