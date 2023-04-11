@@ -1,9 +1,9 @@
-import { Typography } from "@mui/material";
+import { Alert } from "@mui/material";
 
 function DisplayError(props: { error?: string }) {
 	const { error } = props;
 
-	return error ? <Typography fontSize={10}>{error}</Typography> : <></>;
+	return error ? <Alert severity="error">{error}</Alert> : <></>;
 }
 
 export default DisplayError;

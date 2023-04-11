@@ -1,4 +1,4 @@
-import { WalletApi } from "@concordium/browser-wallet-api-helpers";
+import { SmartContractParameters, WalletApi } from "@concordium/browser-wallet-api-helpers";
 import { Buffer } from "buffer/";
 
 import {
@@ -13,12 +13,13 @@ import {
 	TransactionStatusEnum,
 	TransactionSummary,
 	CcdAmount,
+	SchemaVersion,
 } from "@concordium/web-sdk";
 import { ParamContractAddress } from "./ConcordiumTypes";
 
 export interface ContractInfo {
 	schemaBuffer: Buffer;
-	contractName: "CIS2-Multi" | "Market-NFT";
+	contractName: "CIS2-Multi" | "Market-NFT" | "auction";
 	moduleRef?: ModuleReference;
 }
 
@@ -37,12 +38,11 @@ export interface Cis2ContractInfo extends ContractInfo {
  * @param ccdAmount CCD Amount to initialize the contract with.
  * @returns Contract Address.
  */
-export async function initContract<T>(
+export async function initContract(
 	provider: WalletApi,
 	contractInfo: ContractInfo,
 	account: string,
-	params?: T,
-	serializedParams?: Buffer,
+	params?: SmartContractParameters,
 	maxContractExecutionEnergy = BigInt(9999),
 	ccdAmount = BigInt(0)
 ): Promise<ContractAddress> {
@@ -58,12 +58,10 @@ export async function initContract<T>(
 			amount: toCcd(ccdAmount),
 			moduleRef,
 			initName: contractName,
-			param: serializedParams || Buffer.from([]),
 			maxContractExecutionEnergy,
-		} as InitContractPayload,
-		params || {},
+		},
+		params as SmartContractParameters,
 		schemaBuffer.toString("base64"),
-		2
 	);
 
 	let outcomes = await waitForTransaction(provider, txnHash);
@@ -143,25 +141,17 @@ export async function updateContract<T>(
 	amount: bigint = BigInt(0)
 ): Promise<Record<string, TransactionSummary>> {
 	const { schemaBuffer, contractName } = contractInfo;
-	const parameter = serializeParams(
-		contractName,
-		schemaBuffer,
-		methodName,
-		paramJson
-	);
 	let txnHash = await provider.sendTransaction(
 		account,
 		AccountTransactionType.Update,
 		{
 			maxContractExecutionEnergy,
 			address: contractAddress,
-			message: parameter,
 			amount: toCcd(amount),
 			receiveName: `${contractName}.${methodName}`,
-		} as UpdateContractPayload,
-		paramJson as any,
+		},
+		paramJson as SmartContractParameters,
 		schemaBuffer.toString("base64"),
-		2 //Schema Version
 	);
 
 	let outcomes = await waitForTransaction(provider, txnHash);

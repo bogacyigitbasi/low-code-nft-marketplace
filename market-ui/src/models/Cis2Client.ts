@@ -15,10 +15,12 @@ import {
 	MetadataUrl,
 	OperatorOfQuery,
 	OperatorOfQueryParams,
+	TransferParams,
 	UpdateOperatorParams,
 } from "./Cis2Types";
 import { ContractInfo, Cis2ContractInfo } from "./ConcordiumContractClient";
 import * as connClient from "./ConcordiumContractClient";
+
 
 export const enum MethodName {
 	operatorOf = "operatorOf",
@@ -27,6 +29,7 @@ export const enum MethodName {
 	updateOperator = "updateOperator",
 	mint = "mint",
 	tokenMetadata = "tokenMetadata",
+	transfer = "transfer"
 }
 
 /**
@@ -244,6 +247,26 @@ export async function mint<T>(
 		account,
 		nftContractAddress,
 		MethodName.mint,
+		contractInfo,
+		maxContractExecutionEnergy,
+		BigInt(0)
+	);
+}
+
+export async function transfer(
+	provider: WalletApi,
+	account: string,
+	transfers: TransferParams,
+	nftContractAddress: ContractAddress,
+	contractInfo: Cis2ContractInfo,
+	maxContractExecutionEnergy = BigInt(9999)
+): Promise<Record<string, TransactionSummary>> {
+	return updateContract(
+		provider,
+		transfers,
+		account,
+		nftContractAddress,
+		MethodName.transfer,
 		contractInfo,
 		maxContractExecutionEnergy,
 		BigInt(0)
