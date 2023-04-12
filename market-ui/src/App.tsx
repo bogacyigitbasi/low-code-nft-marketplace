@@ -20,6 +20,7 @@ import SellPage from "./pages/SellPage";
 import ContractFindInstanceOrInit from "./pages/ContractFindInstanceOrInit";
 import MintPage from "./pages/MintPage";
 import {
+	AUCTION_CONTRACT_INFO,
 	CIS2_MULTI_CONTRACT_INFO,
 	CREATE_NEW_MARKETPLACE,
 	MARKETPLACE_CONTRACT_INFO,
@@ -28,6 +29,7 @@ import {
 import ConnectWallet from "./components/ConnectWallet";
 import Header from "./components/ui/Header";
 import { MINTING_UI_ONLY } from "./Constants";
+import CreateAuction from "./pages/CreateAuction";
 
 function App() {
 	const params = useParams();
@@ -113,6 +115,20 @@ function App() {
 		display: "primary" | "secondary";
 	}>();
 
+	pages.push({
+		path: "/auctions/create-new",
+		name: "Create New Auction",
+		display: "secondary",
+		component: <CreateAuction
+			tokenContractInfo={CIS2_MULTI_CONTRACT_INFO}
+			provider={state.provider!}
+			account={state.account!}
+			auctionContractInfo={AUCTION_CONTRACT_INFO}
+			onDone={function (auctionAddress: ContractAddress, tokenAddress: ContractAddress, tokenId: string): void {
+				alert(`Created new Auction ${auctionAddress.index.toString()}/${auctionAddress.subindex.toString()} for token ${tokenId} at ${tokenAddress.index.toString()}/${tokenAddress.subindex.toString()}`);
+			}} />
+	})
+
 	if (state.marketplaceContractAddress) {
 		pages.push({
 			path: "/buy/:index/:subindex",
@@ -178,19 +194,19 @@ function App() {
 	function DefaultRouteElement() {
 		if (MINTING_UI_ONLY) {
 			return <Navigate replace to={"/mint-multi-batch"} />;
-		} else 
-		if (state.marketplaceContractAddress) {
-			return (
-				<Navigate
-					replace
-					to={`/buy/${state.marketplaceContractAddress.index.toString()}/${state.marketplaceContractAddress.subindex.toString()}`}
-				/>
-			);
-		} else if (CREATE_NEW_MARKETPLACE) {
-			return <Navigate replace to={"/marketplace-init-or-add"} />;
-		} else {
-			return <Navigate replace to={"/mint-multi-batch"} />;
-		}
+		} else
+			if (state.marketplaceContractAddress) {
+				return (
+					<Navigate
+						replace
+						to={`/buy/${state.marketplaceContractAddress.index.toString()}/${state.marketplaceContractAddress.subindex.toString()}`}
+					/>
+				);
+			} else if (CREATE_NEW_MARKETPLACE) {
+				return <Navigate replace to={"/marketplace-init-or-add"} />;
+			} else {
+				return <Navigate replace to={"/mint-multi-batch"} />;
+			}
 	}
 
 	return (
@@ -209,7 +225,7 @@ function App() {
 				)}
 			</Box>
 			<footer className="footer">
-				<Typography textAlign={"center"} sx={{color: "white"}}>
+				<Typography textAlign={"center"} sx={{ color: "white" }}>
 					{/* <Link sx={{color: "white"}} href="https://developer.concordium.software/en/mainnet/index.html" target={"_blank"}>Concordium Developer Documentation</Link> */}
 					<Link
 						sx={{ color: "white" }}

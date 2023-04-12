@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"name": "server",
+			"path": "market-backend/server"
+		},
+		{
+			"name": "market-ui",
+			"path": "market-ui"
+		},
+		{
+			"name": "server-rust-bindings",
+			"path": "market-backend/server-rust-bindings"
+		}
+	],
+	"settings": {}
+}

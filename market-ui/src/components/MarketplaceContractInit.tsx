@@ -24,15 +24,12 @@ function MarketplaceContractInit(props: {
 		setState({ ...state, processing: true });
 
 		const params = { commission: commission * 100 };
-		const serializedParams = Buffer.alloc(2);
-		serializedParams.writeUInt16LE(params.commission, 0);
 
 		initContract(
 			props.provider,
 			props.contractInfo,
 			props.account,
 			params,
-			serializedParams
 		)
 			.then((address) => {
 				setState({ ...state, processing: false });
