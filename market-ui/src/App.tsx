@@ -20,7 +20,7 @@ import SellPage from "./pages/SellPage";
 import ContractFindInstanceOrInit from "./pages/ContractFindInstanceOrInit";
 import MintPage from "./pages/MintPage";
 import {
-	AUCTION_CONTRACT_INFO,
+	// AUCTION_CONTRACT_INFO,
 	CIS2_MULTI_CONTRACT_INFO,
 	CREATE_NEW_MARKETPLACE,
 	MARKETPLACE_CONTRACT_INFO,
@@ -115,19 +115,19 @@ function App() {
 		display: "primary" | "secondary";
 	}>();
 
-	pages.push({
-		path: "/auctions/create-new",
-		name: "Create New Auction",
-		display: "secondary",
-		component: <CreateAuction
-			tokenContractInfo={CIS2_MULTI_CONTRACT_INFO}
-			provider={state.provider!}
-			account={state.account!}
-			auctionContractInfo={AUCTION_CONTRACT_INFO}
-			onDone={function (auctionAddress: ContractAddress, tokenAddress: ContractAddress, tokenId: string): void {
-				alert(`Created new Auction ${auctionAddress.index.toString()}/${auctionAddress.subindex.toString()} for token ${tokenId} at ${tokenAddress.index.toString()}/${tokenAddress.subindex.toString()}`);
-			}} />
-	})
+	// pages.push({
+	// 	path: "/auctions/create-new",
+	// 	name: "Create New Auction",
+	// 	display: "secondary",
+	// 	component: <CreateAuction
+	// 		tokenContractInfo={CIS2_MULTI_CONTRACT_INFO}
+	// 		provider={state.provider!}
+	// 		account={state.account!}
+	// 		auctionContractInfo={AUCTION_CONTRACT_INFO}
+	// 		onDone={function (auctionAddress: ContractAddress, tokenAddress: ContractAddress, tokenId: string): void {
+	// 			alert(`Created new Auction ${auctionAddress.index.toString()}/${auctionAddress.subindex.toString()} for token ${tokenId} at ${tokenAddress.index.toString()}/${tokenAddress.subindex.toString()}`);
+	// 		}} />
+	// })
 
 	if (state.marketplaceContractAddress) {
 		pages.push({
